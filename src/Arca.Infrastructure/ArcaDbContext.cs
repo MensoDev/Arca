@@ -1,6 +1,7 @@
 ﻿using Arca.Domain.Entities;
 using Arca.Infrastructure.Configurations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Arca.Infrastructure;
 
@@ -16,4 +17,12 @@ public class ArcaDbContext : DbContext
         modelBuilder.ApplyConfiguration(new BrokerageNoteConfiguration());
         modelBuilder.ApplyConfiguration(new TradingOperationConfiguration());
     }
+    
+    protected override void OnConfiguring(DbContextOptionsBuilder options)
+    {
+        options.LogTo(Console.WriteLine, LogLevel.Warning)
+            .EnableDetailedErrors()
+            .EnableSensitiveDataLogging();
+    }
+    
 }

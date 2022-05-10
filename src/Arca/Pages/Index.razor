@@ -1,8 +1,66 @@
 ﻿@page "/"
+@inject ISnackbar Snackbar
+@inject IBrokerageNoteService BrokerageNoteService
+@inject IPdfService PdfService
 <PageTitle>Arca</PageTitle>
 
 <MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
     <MudText Typo="Typo.h3" GutterBottom="true">Hello, world!</MudText>
-    <MudText Class="mb-8">Welcome to your new app, powered by MudBlazor!</MudText>
-    <MudAlert Severity="Severity.Normal">You can find documentation and examples on our website here: <MudLink Href="https://mudblazor.com" Typo="Typo.body2" Color="Color.Inherit"><b>www.mudblazor.com</b></MudLink></MudAlert>
+    <MudText Class="mb-8">Welcome to Arca, uma imitação do Arcar!</MudText>
+    <MudAlert Severity="Severity.Normal">
+        Este app é um que nem o 
+        <MudLink Href="https://github.com/guimabdo/arcar" Typo="Typo.body2" Color="Color.Inherit">
+            <b>Arcar by guimabdo</b>
+        </MudLink>
+        but not equals, just to study
+    </MudAlert>
+    
+    
+    <InputFile id="fileInput112" OnChange="UploadFile" hidden accept=".pdf" />
+    
+    <MudButton HtmlTag="label"
+               Class="mt-4 mb-4"
+               Variant="Variant.Filled"
+               Color="Color.Primary"
+               StartIcon="@Icons.Filled.CloudUpload"
+               for="fileInput112">
+        Upload your Brokerage Note
+    </MudButton>
+    
+    <MudTable Items="@_model?.OperationModels" Hover="true" Breakpoint="Breakpoint.Sm"  LoadingProgressColor="Color.Info">
+        <HeaderContent>
+            <MudTh>Title</MudTh>
+            <MudTh>Description</MudTh>
+            <MudTh>Type</MudTh>
+            <MudTh>Price Per Unit</MudTh>
+            <MudTh>Quantity</MudTh>
+            <MudTh>Market Type</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Title">@context.Title</MudTd>
+            <MudTd DataLabel="Description">@context.Description</MudTd>
+            <MudTd DataLabel="Type">@context.Type</MudTd>
+            <MudTd DataLabel="Price Per Unit">@context.PricePerUnit</MudTd>
+            <MudTd DataLabel="Quantity">@context.Quantity</MudTd>
+            <MudTd DataLabel="Market Type">@context.MarketType</MudTd>
+        </RowTemplate>
+    </MudTable>
+    
 </MudContainer>
+
+@code
+{
+    private BrokerageNoteModel? _model;
+    
+    private async Task UploadFile(InputFileChangeEventArgs e)
+    {
+        //Do your validations here
+        //Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
+        //Snackbar.Add($"Files with {entries.FirstOrDefault().Size} bytes size are not allowed", Severity.Error);
+        //Snackbar.Add($"Files starting with letter {entries.FirstOrDefault().Name.Substring(0, 1)} are not recommended", Severity.Warning);
+        //Snackbar.Add($"This file has the extension {entries.FirstOrDefault().Name.Split(".").Last()}", Severity.Info);
+        await using var stream = e.File.OpenReadStream();
+        var text = await PdfService.ReadBrokerageNoteByStreamAsync(stream);
+        _model = BrokerageNoteService.CreateBrokerageNoteByText(text);
+    }
+}
